@@ -48,7 +48,9 @@ class UsersController extends Controller
 
         $this->model->create($data);
 
-        return redirect()->route('users.index');
+        //$request->session()->flash('create', 'Usuario Cadastrado com Sucesso!');
+
+        return redirect()->route('users.index')->with('create', 'Usuario Cadastrado com Sucesso!');
 
     }
 
@@ -79,15 +81,19 @@ class UsersController extends Controller
 
         $user->update($data);
 
+        $request->session()->flash('update', 'Usuario atualizado com Sucesso!');
+
         return redirect()->route('users.index');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         if (!$user = $this->model->find($id))
             return redirect()->route('users.index');
 
         $user->delete();
+
+        $request->session()->flash('destroy', 'Usuario excluido com Sucesso!');
 
         return redirect()->route('users.index');
     }
