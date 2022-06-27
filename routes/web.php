@@ -14,3 +14,10 @@ Route::get('/users/create', [UsersController::class, 'create'])->name('users.cre
 Route::post('/users', [UsersController::class, 'store'])->name('users.store');
 Route::get('/users/{id}', [UsersController::class, 'show'])->name('users.show');
 
+
+Route::get('/', function () {
+    return view('home');
+});
+
+require __DIR__.'/auth.php';
+
