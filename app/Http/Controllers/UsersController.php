@@ -16,8 +16,7 @@ class UsersController extends Controller
 
     public function index(Request $request)
     {
-        $users = $this->model
-                ->getUsers(
+        $users = $this->model->getUsers(
                     $request->search ?? ''
                 );
 
@@ -96,5 +95,11 @@ class UsersController extends Controller
         $request->session()->flash('destroy', 'Usuario excluido com Sucesso!');
 
         return redirect()->route('users.index');
+    }
+
+
+    public function admin()
+    {
+        return view('admin.index');
     }
 }

@@ -27,16 +27,28 @@
                             @endif
                         </div>
                         <ul class="py-1" aria-labelledby="dropdown">
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
+                            @if(Auth::user()->is_admin == 1)
+                                <li>
+                                <div class="py-3 px-4">
+                                    <a href="/admin">
+                                        <span class="block text-sm font-medium text-gray-900 truncate dark:text-gray-400">
+                                            Painel Admin
+                                        </span>
+                                    </a>
+                                </div>
+                                </li>
+                            @endif
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
 
-                                <x-responsive-nav-link :href="route('logout')"
-                                        onclick="event.preventDefault();
-                                                    this.closest('form').submit();">
-                                    {{ __('Sair') }}
-                                </x-responsive-nav-link>
-                            </form>                </li>
+                                    <x-responsive-nav-link :href="route('logout')"
+                                            onclick="event.preventDefault();
+                                                        this.closest('form').submit();">
+                                        {{ __('Sair') }}
+                                    </x-responsive-nav-link>
+                                </form>                
+                            </li>
                         </ul>
                     </div>
                     <button data-collapse-toggle="mobile-menu-2" type="button" class="inline-flex items-center p-2 ml-1 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="mobile-menu-2" aria-expanded="false">
