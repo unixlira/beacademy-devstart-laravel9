@@ -21,11 +21,11 @@ class HomeController extends Controller
         return view('site.home', compact('products'));
     }
 
-    public function home()
+    public function home(Request $request)
     {
         $products = $this->product->getProducts();
 
-        return view('site.home', compact('products'));
+        return view('site.home', compact('products','request'));
     }
 
     public function cart()

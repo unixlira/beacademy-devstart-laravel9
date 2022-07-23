@@ -6,7 +6,7 @@
 
 
 <div class="flex justify-center">
-<h1 class="text-2xl font-semibold leading-tigh py-2">ID:  {{ $product->id }}</h1>
+  <h1 class="text-2xl font-semibold leading-tigh py-2">ID:  {{ $product->id }}</h1>
 </div>
 
 <div class="flex justify-center">

@@ -74,6 +74,11 @@
           <th
             class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
           >
+            Tipo
+          </th>
+          <th
+            class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+          >
             Preço
           </th>
           <th
@@ -100,6 +105,7 @@
                 @endif
             </td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $product->name }}</td>
+            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $product->type }}</td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">R$ {{ formatMoney($product->price) }}</td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                 <a href="{{ route('products.edit', $product->id) }}" class="bg-green-200 rounded-full py-2 px-6">Editar</a>

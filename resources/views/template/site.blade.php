@@ -66,7 +66,7 @@
                             mt-2
                             lg:mt-0
                             mr-1
-                        " href="#">
+                        " href="/">
                         <img src="{{ url('/storage/logo-ebook.png') }}" style="height: 30px" alt=""
                         loading="lazy" />
                     </a>
@@ -76,7 +76,7 @@
                 <!-- Right elements -->
                 <div class="flex items-center relative">
                     <!-- Icon -->
-                    <a class="text-gray-500 hover:text-gray-700 focus:text-gray-700 mr-4" href="#">
+                    <a class="text-gray-500 hover:text-gray-700 focus:text-gray-700 mr-4" href="{{ route('cart.index') }}">
                         <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="shopping-cart"
                         class="w-4" role="img" xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 576 512">
@@ -86,6 +86,9 @@
                         </svg>
                     </a>
 
+                    @if(session()->get('cart'))
+                        <span class="text-white bg-red-700 absolute rounded-full text-xs -mt-4 ml-3 py-0 px-1.5">{{count(session()->get('cart'))}}</span>
+                    @endif
                     <div class="dropdown relative">
                         <a class="dropdown-toggle flex items-center hidden-arrow" href="#" id="dropdownMenuButton2" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -288,4 +291,5 @@
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>
+<script src="https://unpkg.com/flowbite@1.4.7/dist/flowbite.js"></script>
 </html>

@@ -3,11 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     AdminController,
+    CartController,
     UsersController,
     HomeController,
     OrdersController,
     ProductsController
 };
+use App\Http\Controllers\Api\NewsController;
 
 require __DIR__.'/auth.php';
 
@@ -15,10 +17,14 @@ require __DIR__.'/auth.php';
 Route::get('/', [HomeController::class, 'index']);
 
 
+
 Route::middleware('auth')->prefix('site')->group(function () {
-    Route::get('/', [HomeController::class, 'home']);
-    Route::get('/cart', [HomeController::class, 'cart']);
-    Route::get('/add', [HomeController::class, 'addCart']);
+    Route::get('/', [HomeController::class, 'home'])->name('home.index');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/addcart/{id}', [CartController::class, 'store'])->name('cart.store');
+    Route::post('/removecart/{key}', [CartController::class, 'destroy'])->name('cart.destroy');
+    Route::post('/createorder', [CartController::class, 'create'])->name('order.create');
+
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {

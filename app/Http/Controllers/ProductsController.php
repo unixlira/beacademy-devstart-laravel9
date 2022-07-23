@@ -53,8 +53,6 @@ class ProductsController extends Controller
 
         $this->model->create($data);
 
-        //$request->session()->flash('create', 'Usuario Cadastrado com Sucesso!');
-
         return redirect()->route('products.index')->with('create', 'Produto Cadastrado com Sucesso!');
 
     }

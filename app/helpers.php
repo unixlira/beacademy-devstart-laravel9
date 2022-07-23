@@ -18,3 +18,15 @@ function percentDiscount($price)
     return  round($price - ($price * $porcentagem / 100));
 
 }
+
+
+function sumPrices($data)
+{
+    $amount = 0;
+    
+    foreach ($data as  $value) {
+        $amount += $value['price'];
+    }
+
+    return $amount;
+}
