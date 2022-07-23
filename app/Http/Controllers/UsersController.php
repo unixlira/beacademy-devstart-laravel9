@@ -84,6 +84,8 @@ class UsersController extends Controller
             $data['image'] = $request->image->store('users');
         }
 
+        $data['is_admin'] = $request->admin ? 1 : 0;
+
         $user->update($data);
 
         $request->session()->flash('update', 'Usuario atualizado com Sucesso!');
@@ -103,9 +105,4 @@ class UsersController extends Controller
         return redirect()->route('users.index');
     }
 
-
-    public function admin()
-    {
-        return view('admin.index');
-    }
 }

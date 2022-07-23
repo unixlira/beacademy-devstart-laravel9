@@ -1,1 +1,1 @@
-<img width="350" height="94" src="{{url('/storage/logo-login.png')}}" class="attachment-large size-large" alt="be.academy" >
+<img width="350" height="94" src="{{url('/storage/logo-ebook.png')}}" class="attachment-large size-large rounded-lg" alt="be.academy" >

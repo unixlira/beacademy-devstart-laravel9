@@ -14,6 +14,7 @@ class AddFieldIsAdminToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->string('image')->nullable()->after('email');
             $table->boolean('is_admin')->nullable()->after('image');
         });
     }
@@ -26,6 +27,7 @@ class AddFieldIsAdminToUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('image');
             $table->dropColumn('is_admin');
         });
     }

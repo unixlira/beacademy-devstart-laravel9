@@ -1,6 +1,6 @@
-@extends('template.users')
+@extends('template.admin')
 
-@section('title', 'Listagem dos Usuários')
+@section('title', 'Listagem dos Pedidos')
 
 
 @section('content')
@@ -51,40 +51,35 @@
     Listagem dos usuários
 </h1>
 
-<a href="{{ route('users.create') }}" class="bg-black rounded-full text-white px-5 py-3 text-sm">Adicionar Novo Usuário</a>
+<a href="{{ route('orders.create') }}" class="bg-black rounded-full text-white px-5 py-3 text-sm">Adicionar Novo Pedido</a>
 
-<form action="{{ route('users.index') }}" method="get" class="py-8">
+<form action="{{ route('orders.index') }}" method="get" class="py-8">
     <input type="text" name="search" placeholder="Pesquisar" class="md:w-1/6 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500">
     <button class="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded">Pesquisar</button>
 </form>
 
-<table class="min-w-full leading-normal shadow-md rounded-lg overflow-hidden">
+<table class="min-w-full leading-normal shadow-md rounded-lg overflow-hidden ">
     <thead>
         <tr>
         <th
             class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
           >
-            Foto
+            Id
           </th>
           <th
             class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
           >
-            Nome
+            Usuário
           </th>
           <th
             class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
           >
-            E-mail
+            Data Criação
           </th>
           <th
             class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
           >
-           Data Criação
-          </th>
-          <th
-            class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-          >
-           Preço
+           Data Atualização
           </th>
           <th
             class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
@@ -100,24 +95,17 @@
         </tr>
       </thead>
       <tbody>
-    @foreach ($users as $user)
+    @foreach ($orders as $order)
         <tr>
+            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $order->id }}</td>
+            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $order->user->name }}</td>
+            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ formatDateTime($order->created_at) }}</td>
+            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ formatDateTime($order->updated_at) }}</td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                @if ($user->image)
-                    <img src="{{ url("storage/{$user->image}") }}" alt="{{ $user->name }}" class="object-cover w-20 rounded-full">
-                @else
-                    {{ $user->name }}
-                @endif
-            </td>
-            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $user->name }}</td>
-            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $user->email }}</td>
-            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ formatDateTime($user->created_at) }}</td>
-            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ formatMoney('5000') }}</td>
-            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                <a href="{{ route('users.edit', $user->id) }}" class="bg-green-200 rounded-full py-2 px-6">Editar</a>
+                <a href="{{ route('orders.edit', $order->id) }}" class="bg-green-200 rounded-full py-2 px-6">Editar</a>
             </td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                <a href="{{ route('users.show', $user->id) }}" class="bg-orange-200 rounded-full py-2 px-6">Detalhes</a>
+                <a href="{{ route('orders.show', $order->id) }}" class="bg-orange-200 rounded-full py-2 px-6">Detalhes</a>
             </td>
         </tr>
     @endforeach
