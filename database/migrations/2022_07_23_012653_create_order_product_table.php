@@ -23,6 +23,7 @@ class CreateOrderProductTable extends Migration
             ->constrained('products')
             ->onUpdate('CASCADE')
             ->onDelete('CASCADE');
+            $table->string('quantity')->nullable();
         });
     }
 

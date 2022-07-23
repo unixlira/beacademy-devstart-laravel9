@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class OrderUser extends Model
 {
@@ -17,4 +18,13 @@ class OrderUser extends Model
     ];
 
     public $timestamps = false;
+
+    public function store($data)
+    {        
+        $orderUser = new OrderUser();
+        $orderUser->user_id = Auth::id();
+        $orderUser->order_id = $data->id;
+        $orderUser->save();
+
+    }
 }

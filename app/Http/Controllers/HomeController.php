@@ -41,4 +41,9 @@ class HomeController extends Controller
         session()->put('products', $products);
         return redirect()->back();
     }
+
+    public function orders()
+    {
+        return view('site.orders');
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Order extends Model
 {
@@ -16,10 +17,6 @@ class Order extends Model
         'product_id'
 
     ];
-
-    protected $attributes = [
-        'quantity' => '1'
-     ];
 
 
     public function getOrders(string $search = null)
@@ -49,6 +46,16 @@ class Order extends Model
     public function products()
     {
         return $this->belongsToMany(Product::class);
+    }
+
+    public function store($data)
+    {        
+        $order = new Order();
+        $order->user_id = Auth::id();
+        $order->amount = $data->amount+12;
+        $order->save();
+
+        return $order;
     }
     
 }

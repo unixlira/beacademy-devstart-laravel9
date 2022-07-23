@@ -59,6 +59,34 @@
                                         </a>
                                     </div>
                                 </li>
+                                <span class="block text-sm text-gray-900 dark:text-white">Acessos</span>
+                                <li>
+                                    <div class="px-4">
+                                        <a href="{{ route('home.index') }}">
+                                            <span class="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
+                                                Site
+                                            </span>
+                                        </a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="px-4">
+                                        <a href="{{ route('cart.index') }}">
+                                            <span class="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
+                                                Carrinho
+                                            </span>
+                                        </a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="px-4">
+                                        <a href="{{ route('home.orders') }}">
+                                            <span class="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
+                                                Pedidos
+                                            </span>
+                                        </a>
+                                    </div>
+                                </li>
                             @endif
                             </div>
                             <hr>

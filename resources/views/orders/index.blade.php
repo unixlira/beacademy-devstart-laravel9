@@ -48,7 +48,7 @@
 @endif
 
 <h1 class="text-2xl font-semibold leading-tigh py-2">
-    Listagem dos usuários
+    Listagem dos Pedidos
 </h1>
 
 <a href="{{ route('orders.create') }}" class="bg-black rounded-full text-white px-5 py-3 text-sm">Adicionar Novo Pedido</a>

@@ -2,12 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\OrderProduct;
+use App\Models\OrderUser;
 use App\Models\Product;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
+
+    protected $order;
+    protected $orderUser;
+    protected $orderProduct;
+
+    public function __construct(Order $order, OrderProduct $orderProduct, OrderUser $orderUser)
+    {
+        $this->model = $order;
+        $this->orderUser = $orderUser;
+        $this->orderProduct = $orderProduct;
+    }
 
     public function index()
     {
@@ -48,8 +62,13 @@ class CartController extends Controller
 
     public function create(Request $request)
     {
-        //dd($request);
 
-        return view('site.checkout');
+        $order = $this->model->store($request);
+        $this->orderUser->store($order);
+        $this->orderProduct->store($order);
+        session()->push('order', $order);
+        session()->forget('cart');
+
+        return redirect()->route('checkout.index');
     }
 }

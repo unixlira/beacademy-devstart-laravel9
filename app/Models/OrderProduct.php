@@ -17,4 +17,17 @@ class OrderProduct extends Model
     ];
 
     public $timestamps = false;
+
+    public function store($order)
+    {
+        if (!$products = session()->get('cart'))
+            return redirect()->route('products.index');
+
+        foreach ($products as $product) {
+            $orderProduct = new OrderProduct();
+            $orderProduct->order_id = $order->id;
+            $orderProduct->product_id = $product['id'];
+            $orderProduct->save();
+        }
+    }
 }

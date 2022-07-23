@@ -9,7 +9,8 @@ use App\Http\Controllers\{
     OrdersController,
     ProductsController
 };
-use App\Http\Controllers\Api\NewsController;
+use App\Http\Controllers\Api\CheckoutController;
+use Psy\VersionUpdater\Checker;
 
 require __DIR__.'/auth.php';
 
@@ -23,7 +24,13 @@ Route::middleware('auth')->prefix('site')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/addcart/{id}', [CartController::class, 'store'])->name('cart.store');
     Route::post('/removecart/{key}', [CartController::class, 'destroy'])->name('cart.destroy');
+    Route::get('/orders', [HomeController::class, 'orders'])->name('home.orders');
     Route::post('/createorder', [CartController::class, 'create'])->name('order.create');
+
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/create', [CheckoutController::class, 'create'])->name('paylivre.create');
+    
+
 
 });
 

@@ -18,7 +18,7 @@
           <h3 class="font-semibold text-center text-gray-600 text-xs uppercase w-1/5 text-center"></h3>
           <h3 class="font-semibold text-center text-gray-600 text-xs uppercase w-1/5 text-center">Preço</h3>
         </div>
-        
+
         @foreach (session()->get('cart') as $key => $product)
           <div class="flex items-center hover:bg-gray-100 -mx-8 px-6 py-5">
             <div class="flex w-2/5"> <!-- product -->
@@ -72,10 +72,8 @@
 
           <form action="{{ route('order.create') }}" method="POST" class="px-4 py-2 bg-green-600  text-center text-sm text-white rounded duration-300">
             @csrf
-            <input type="hidden" name="order[]" value="session()->get('cart')">
-            <button type="submit" class="">
-              Comprar
-            </button>
+            <input type="hidden" name="amount" value="{{ sumPrices(session()->get('cart')) }}">
+            <button type="submit" class="">Comprar</button>
           </form>
         </div>
       </div>

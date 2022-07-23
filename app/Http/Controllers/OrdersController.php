@@ -38,12 +38,12 @@ class OrdersController extends Controller
     {
 
         $order = Order::with('products')->find($id);
+        $products = $order->products()->paginate(6);
 
-
-        if($order){
-            return view('orders.show', compact('order'));
+        if($products){
+            return view('orders.show', compact('order', 'products'));
         }else{
-            throw new Exception('Usuário não encontrado');
+            throw new Exception('Pedido não encontrado');
         }
 
     }

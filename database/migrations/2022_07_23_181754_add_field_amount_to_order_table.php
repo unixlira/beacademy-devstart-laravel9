@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOrdersTable extends Migration
+class AddFieldAmountToOrderTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,8 @@ class CreateOrdersTable extends Migration
      */
     public function up()
     {
-        Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')
-            ->constrained('users')
-            ->onUpdate('CASCADE')
-            ->onDelete('CASCADE');
-            $table->timestamps();
+        Schema::table('order', function (Blueprint $table) {
+            $table->string('amount')->nullable()->after('quantity');
         });
     }
 
@@ -30,6 +25,8 @@ class CreateOrdersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('orders');
+        Schema::table('order', function (Blueprint $table) {
+            $table->dropColumn('type');
+        });
     }
 }

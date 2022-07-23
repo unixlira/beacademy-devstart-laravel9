@@ -90,35 +90,37 @@
 
 <!-- List Products -->
 <div class="container mx-auto px-60 py-8 grid grid-cols-3 gap-20"> 
-   @foreach ($products as $product)
-      <div class="w-72 bg-white drop-shadow-md rounded-lg ...">
-        <img class="object-cover rounded-tl-lg rounded-tr-lg"
-            src="{{ url("storage/{$product->image}") }}" />
-         <div class="px-5 py-3 space-y-2">
-            <h3 class="text-lg">{{ $product->name }}</h3>
-            <hr>
-            <p class="space-x-2">
-               <span class="text-2xl font-semibold">R$ {{ formatMoney($product->price) }}</span>
-            </p>
-            <p class="space-x-2">
-               <span class="text-sm line-through text-gray-500">R$ {{ formatMoney(percentDiscount($product->price)) }}</span>
-               <span class="text-sm text-red-700">40% off</span>
-            </p>
+   @if(isset($products))
+      @foreach ($products as $product)
+         <div class="w-72 bg-white drop-shadow-md rounded-lg ...">
+         <img class="object-cover rounded-tl-lg rounded-tr-lg"
+               src="{{ url("storage/{$product->image}") }}" />
+            <div class="px-5 py-3 space-y-2">
+               <h3 class="text-lg">{{ $product->name }}</h3>
+               <hr>
+               <p class="space-x-2">
+                  <span class="text-2xl font-semibold">R$ {{ formatMoney($product->price) }}</span>
+               </p>
+               <p class="space-x-2">
+                  <span class="text-sm line-through text-gray-500">R$ {{ formatMoney(percentDiscount($product->price)) }}</span>
+                  <span class="text-sm text-red-700">40% off</span>
+               </p>
 
-            <div class="px-4 py-2 bg-red-600 hover:bg-amber-600 text-center text-sm text-white rounded duration-300">
-               <form action="{{ route('cart.store',['id' => $product->id ]) }}" method="POST">
-                  @csrf
-                  <input type="hidden" name="quatity" value="1">
-                  <input type="hidden" name="name" value="{{ $product->name }}">
-                  <input type="hidden" name="identity" value="{{ $product->id }}">
-                  <input type="hidden" name="price" value="{{ $product->price }}">
-                  <button type="submit">Adicionar ao Carrinho</button>
-               </form>
+               <div class="px-4 py-2 bg-red-600 hover:bg-amber-600 text-center text-sm text-white rounded duration-300">
+                  <form action="{{ route('cart.store',['id' => $product->id ]) }}" method="POST">
+                     @csrf
+                     <input type="hidden" name="quatity" value="1">
+                     <input type="hidden" name="name" value="{{ $product->name }}">
+                     <input type="hidden" name="identity" value="{{ $product->id }}">
+                     <input type="hidden" name="price" value="{{ $product->price }}">
+                     <button type="submit">Adicionar ao Carrinho</button>
+                  </form>
+               </div>
+
             </div>
-
          </div>
-      </div>
-   @endforeach
+      @endforeach
+   @endif
 </div>
 
 <div class="container mx-auto px-60 py-8"> 
