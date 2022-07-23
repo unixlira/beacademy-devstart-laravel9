@@ -8,7 +8,7 @@
 
 <!-- List Products -->
 <div class="container mx-auto px-60 py-8 grid grid-cols-3 gap-20"> 
-   @foreach ($products as $product)
+   @foreach ($order->products as $product)
       <div class="w-72 bg-white drop-shadow-md rounded-lg ...">
             <div class="py-5 flex justify-center ">
               <img class=" object-cover rounded-tl-lg rounded-tr-lg"

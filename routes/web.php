@@ -14,6 +14,13 @@ require __DIR__.'/auth.php';
 
 Route::get('/', [HomeController::class, 'index']);
 
+
+Route::middleware('auth')->prefix('site')->group(function () {
+    Route::get('/', [HomeController::class, 'home']);
+    Route::get('/cart', [HomeController::class, 'cart']);
+    Route::get('/add', [HomeController::class, 'addCart']);
+});
+
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     //Users
@@ -46,8 +53,3 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     //ADMIN
     Route::get('/',[AdminController::class, 'index'])->name('admin.index');
 });
-
-
-
-
-

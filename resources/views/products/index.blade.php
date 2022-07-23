@@ -94,7 +94,7 @@
         <tr>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                 @if ($product->image)
-                    <img src="{{ url("storage/{$product->image}") }}" alt="{{ $product->name }}" class="object-cover w-20 rounded-full">
+                    <img src="{{ url("storage/{$product->image}") }}" alt="{{ $product->name }}" class="h-24 w-full ">
                 @else
                     {{ $product->name }}
                 @endif
@@ -115,5 +115,5 @@
 <div class="py-4">
 
 </div>
-
+{{ $products->links() }}
 @endsection

@@ -1,4 +1,4 @@
-@extends('template.users')
+@extends('template.admin')
 
 @section('title', "Editar o Usuário {$user->name}")
 

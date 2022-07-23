@@ -25,7 +25,7 @@ class Product extends Model
             if ($search) {
                 $query->where('name', 'LIKE', "%{$search}%");
             }
-        })->paginate(5);
+        })->paginate(6);
 
         return $products;
     }

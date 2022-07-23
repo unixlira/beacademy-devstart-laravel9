@@ -17,21 +17,31 @@ class Order extends Model
 
     ];
 
+    protected $attributes = [
+        'quantity' => '1'
+     ];
+
 
     public function getOrders(string $search = null)
     {
 
         $orders = $this->where(function ($query) use ($search) {
             if ($search) {
-                $query->where('user_id', $search);
+                $user = User::where('name', 'LIKE', "%{$search}%")->first();
+                $query->where('user_id', $user->id);
 
             }
-        })->paginate(5);
+        })->paginate(6);
 
         return $orders;
     }
 
     public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function product()
     {
         return $this->belongsTo(User::class);
     }

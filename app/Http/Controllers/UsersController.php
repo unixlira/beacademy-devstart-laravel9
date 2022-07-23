@@ -6,7 +6,9 @@ use App\Exceptions\UserControllerException;
 use App\Http\Requests\StoreUpdateUserFormRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UsersController extends Controller
 {
@@ -46,6 +48,8 @@ class UsersController extends Controller
     {
         $data = $request->all();
         $data['password'] = bcrypt($request->password);
+        $data['email_verified_at'] = Date::now();
+        $data['remember_token'] = Str::random(10);
 
         if ($request->image) {
             $data['image'] = $request->image->store('users');
@@ -53,7 +57,6 @@ class UsersController extends Controller
 
         $this->model->create($data);
 
-        //$request->session()->flash('create', 'Usuario Cadastrado com Sucesso!');
 
         return redirect()->route('users.index')->with('create', 'Usuario Cadastrado com Sucesso!');
 

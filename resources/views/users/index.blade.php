@@ -1,4 +1,4 @@
-@extends('template.users')
+@extends('template.admin')
 
 @section('title', 'Listagem dos Usuários')
 
@@ -79,12 +79,12 @@
           <th
             class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
           >
-           Data Criação
+           Tipo
           </th>
           <th
             class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
           >
-           Preço
+          Data Criação
           </th>
           <th
             class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
@@ -106,13 +106,13 @@
                 @if ($user->image)
                     <img src="{{ url("storage/{$user->image}") }}" alt="{{ $user->name }}" class="object-cover w-20 rounded-full">
                 @else
-                    {{ $user->name }}
+                <img src="{{ url("storage/users/avatar.jpg" ) }}" alt="{{ $user->name }}" class="object-cover w-20 rounded-full">
                 @endif
             </td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $user->name }}</td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $user->email }}</td>
+            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $user->is_admin == 1 ? 'Admin' : ''}}</td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ formatDateTime($user->created_at) }}</td>
-            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ formatMoney('5000') }}</td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                 <a href="{{ route('users.edit', $user->id) }}" class="bg-green-200 rounded-full py-2 px-6">Editar</a>
             </td>
@@ -127,5 +127,5 @@
 <div class="py-4">
 
 </div>
-
+{{ $users->links() }}
 @endsection

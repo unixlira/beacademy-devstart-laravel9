@@ -3,16 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderProduct;
+use App\Models\OrderUser;
 use App\Models\Product;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class OrdersController extends Controller
 {
-    public function __construct(Order $order)
+    protected $order;
+    protected $order_user;
+    protected $order_product;
+
+    public function __construct(Order $order, OrderProduct $order_product, OrderUser $order_user)
     {
         $this->model = $order;
+        $this->order_user = $order_user;
+        $this->order_product = $order_product;
     }
 
     public function index(Request $request)
@@ -30,7 +39,6 @@ class OrdersController extends Controller
 
         $order = Order::with('products')->find($id);
 
-        dd($order);
 
         if($order){
             return view('orders.show', compact('order'));
@@ -42,19 +50,35 @@ class OrdersController extends Controller
 
     public function create()
     {
-        return view('orders.create');
+        $users = User::all();
+        
+        $products = Product::all();
+
+        return view('orders.create', compact('users','products'));
     }
 
     public function store(Request $request)
     {
         $data = $request->all();
-        $data['password'] = bcrypt($request->password);
 
-        if ($request->image) {
-            $data['image'] = $request->image->store('orders');
+        $order = $this->model->create($data);
+
+        if($order){
+            $data_product = [
+                'order_id' => $order->id,
+                'product_id' => $order->product_id,
+            ];
+
+            $this->order_product->create($data_product);
+
+            $data_user = [
+                'order_id' => $order->id,
+                'user_id' => $order->user_id,
+            ];
+
+            $this->order_user->create($data_user);
+
         }
-
-        $this->model->create($data);
 
         return redirect()->route('orders.index')->with('create', 'Pedido Cadastrado com Sucesso!');
 
@@ -62,8 +86,9 @@ class OrdersController extends Controller
 
     public function edit($id)
     {
-        if (!$order = $this->model->find($id))
+        if (!$order = $this->model->with('products')->find($id))
             return redirect()->route('orders.index');
+
 
         return view('orders.edit', compact('order'));
     }

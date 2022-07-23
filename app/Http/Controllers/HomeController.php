@@ -18,6 +18,27 @@ class HomeController extends Controller
     {
         $products = $this->product->getProducts();
 
-        return view('home', compact('products'));
+        return view('site.home', compact('products'));
+    }
+
+    public function home()
+    {
+        $products = $this->product->getProducts();
+
+        return view('site.home', compact('products'));
+    }
+
+    public function cart()
+    {
+        $products = $this->product->getProducts();
+
+        return view('site.cart', compact('products'));
+    }
+
+    public function addCart(Request $request)
+    {
+        $products = $request->name;
+        session()->put('products', $products);
+        return redirect()->back();
     }
 }

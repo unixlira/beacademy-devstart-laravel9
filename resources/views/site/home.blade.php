@@ -80,7 +80,7 @@
    @foreach ($products as $product)
       <div class="w-72 bg-white drop-shadow-md rounded-lg ...">
         <img class="object-cover rounded-tl-lg rounded-tr-lg"
-            src="https://www.kindacode.com/wp-content/uploads/2022/06/computer-example.jpg" />
+            src="{{ url("storage/{$product->image}") }}" />
         <div class="px-5 py-3 space-y-2">
             <h3 class="text-lg">{{ $product->name }}</h3>
             <hr>
@@ -92,17 +92,18 @@
                 <span class="text-sm text-red-700">40% off</span>
             </p>
             <div class="flex justify-between items-center pt-3 pb-2">
-                <a href="#"
+                <a href="/add"
                     class="px-4 py-2 bg-red-600 hover:bg-amber-600 text-center text-sm text-white rounded duration-300">
                     Adicionar ao Carrinho</a>
 
-                <a href="#" title="Add to Favorites"
-                    class="text-2xl text-gray-300 hover:text-red-500 duration-300">&hearts;</a>
             </div>
         </div>
     </div>
    @endforeach
-
 </div>
+<div class="container mx-auto px-60 py-8"> 
+{{ $products->links() }}
+</div>
+
 @endsection
 

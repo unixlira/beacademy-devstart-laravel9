@@ -27,35 +27,41 @@
                             @endif
                         </div>
                         <ul class="py-1" aria-labelledby="dropdown">
+                            <div class=" px-4">
+                                <span class="block text-sm text-gray-900 dark:text-white">Gerenciar</span>
+                            
+
                             @if(Auth::user()->is_admin == 1)
                                 <li>
-                                    <div class="py-3 px-4">
+                                    <div class="px-4">
                                         <a href="{{ route('users.index') }}">
-                                            <span class="block text-sm font-medium text-gray-900 truncate dark:text-gray-400">
+                                            <span class="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
                                                 Usuários
                                             </span>
                                         </a>
                                     </div>
                                 </li>
                                 <li>
-                                    <div class="py-3 px-4">
+                                    <div class="px-4">
                                         <a href="{{ route('orders.index') }}">
-                                            <span class="block text-sm font-medium text-gray-900 truncate dark:text-gray-400">
+                                            <span class="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
                                                 Pedidos
                                             </span>
                                         </a>
                                     </div>
                                 </li>
                                 <li>
-                                    <div class="py-3 px-4">
+                                    <div class="px-4">
                                         <a href="{{ route('products.index') }}">
-                                            <span class="block text-sm font-medium text-gray-900 truncate dark:text-gray-400">
+                                            <span class="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
                                                 Produtos
                                             </span>
                                         </a>
                                     </div>
                                 </li>
                             @endif
+                            </div>
+                            <hr>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
