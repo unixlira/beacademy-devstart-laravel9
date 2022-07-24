@@ -129,14 +129,14 @@
 
 
                         <div class="flex justify-center mt-10 gap-20"> 
-                            <img src="{{ url('storage/brands/visa.png')}}" alt="Visa" class="h-12 w-30 ">
-                            <img src="{{ url('storage/brands/master.png')}}" alt="Master" class="h-12 w-30 ">
-                            <img src="{{ url('storage/brands/paylivre.png')}}" alt="Master" class="h-12 w-30 ">
+                            <img src="https://i.ibb.co/nQy8Gth/visa.png" alt="Visa" class="h-12 w-30 ">
+                            <img src="https://i.ibb.co/zhSQJct/master.png" alt="Master" class="h-12 w-30 ">
+                            <img src="https://i.ibb.co/Sy4pSgH/paylivre.png" alt="Master" class="h-12 w-30 ">
 
                         </div>
 
                         <div class="flex justify-center mt-5"> 
-                            <img src="{{ url('storage/brands/safe2.webp')}}" alt="Protected" class="h-15 w-30">
+                            <img src="https://i.ibb.co/DfRjHVT/safe2.webp" alt="Protected" class="h-15 w-30">
                         </div>
                     </form>
                 </div>
