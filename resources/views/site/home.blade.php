@@ -45,19 +45,19 @@
       <div class="carousel-inner relative w-full overflow-hidden">
          <div class="carousel-item active float-left w-full">
             <img
-            src="{{url('/storage/slides/slide1.jpg')}}"
+            src="https://ibb.co/3d9NZft"
             class="block w-full"
             alt="Estude"/>
          </div>
          <div class="carousel-item float-left w-full">
             <img
-            src="{{url('/storage/slides/slide2.jpg')}}"
+            src="https://ibb.co/QprHLcB"
             class="block w-full"
             alt="Estude Mais" />
          </div>
          <div class="carousel-item float-left w-full">
             <img
-            src="{{url('/storage/slides/slide3.jpg')}}"
+            src="https://ibb.co/17xqSjY"
             class="block w-full"
             alt="Continue Estudando..."/>
          </div>
@@ -94,7 +94,7 @@
       @foreach ($products as $product)
          <div class="w-72 bg-white drop-shadow-md rounded-lg ...">
          <img class="object-cover rounded-tl-lg rounded-tr-lg"
-               src="{{ url("storage/{$product->image}") }}" />
+               src="{{ $product->image }}" />
             <div class="px-5 py-3 space-y-2">
                <h3 class="text-lg">{{ $product->name }}</h3>
                <hr>
