@@ -3,7 +3,7 @@
 @section('title', 'eBooks - Carrinho')
 
 @section('content')
-  @if(count(session()->get('cart')) > 0)
+  @if(!is_null(session()->get('cart')))
     <div class="container mx-auto px-60" style="margin-top:-35px;">
         <div class="flex shadow-md my-10">
           <div class="w-3/4 bg-white px-10 py-10">
