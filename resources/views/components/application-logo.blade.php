@@ -1,1 +1,1 @@
-<img width="350" height="94" src="{{url('/storage/logo-ebook.png')}}" class="attachment-large size-large rounded-lg" alt="be.academy" >
+<img width="350" height="94" src="https://i.ibb.co/whRzBk1/logo-ebook.png" class="attachment-large size-large rounded-lg" alt="be.academy" >
