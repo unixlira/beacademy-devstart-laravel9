@@ -99,7 +99,7 @@
         <tr>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                 @if ($product->image)
-                    <img src="{{ $product->image }}" alt="{{ $product->name }}" class="h-24 w-full ">
+                    <img src="{{ url($product->image) }}" alt="{{ $product->name }}" class="h-24 w-full ">
                 @else
                     {{ $product->name }}
                 @endif

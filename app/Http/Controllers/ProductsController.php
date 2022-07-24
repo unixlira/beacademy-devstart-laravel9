@@ -6,6 +6,8 @@ use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+
 
 
 class ProductsController extends Controller
@@ -48,7 +50,7 @@ class ProductsController extends Controller
         $data['password'] = bcrypt($request->password);
 
         if ($request->image) {
-            $data['image'] = $request->image->store('products');
+            $data['image'] = $request->image->store('products', ['disk' => 'images']);
         }
 
         $this->model->create($data);
@@ -75,11 +77,12 @@ class ProductsController extends Controller
             $data['password'] = bcrypt($request->password);
 
         if ($request->image) {
-            if ($product->image && Storage::exists($product->image)) {
-                Storage::delete($product->image);
+            $filename = app_path("products/{$product->image}");
+            if (File::exists($filename)) {
+                File::delete($filename);
             }
 
-            $data['image'] = $request->image->store('products');
+            $data['image'] = $request->image->store('products', ['disk' => 'images']);
         }
 
         $data['is_admin'] = $request->admin ? 1 : 0;

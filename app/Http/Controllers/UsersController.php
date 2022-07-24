@@ -81,7 +81,7 @@ class UsersController extends Controller
             $data['password'] = bcrypt($request->password);
 
         if ($request->image) {
-            $filename = app_path("img/news/{$user->image}");
+            $filename = app_path("users/{$user->image}");
             if (File::exists($filename)) {
                 File::delete($filename);
             }
