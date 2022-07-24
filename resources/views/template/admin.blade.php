@@ -11,8 +11,8 @@
     <div class="container mx-auto px-60 py-8">
         <nav class="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800">
             <div class="container flex flex-wrap justify-between items-center mx-auto">
-                <a href="https://flowbite.com/" class="flex items-center">
-                    <img src="https://i.ibb.co/whRzBk1/logo-ebook.png" class="mr-3 h-6 sm:h-9" alt="Flowbite Logo" />
+                <a href="/" class="flex items-center">
+                    <img src="{{url('/logo/logo-ebook.png')}}" class="mr-3 h-6 sm:h-9" alt="Flowbite Logo" />
                 </a>
                 <div class="flex items-center md:order-2">
                     <button type="button" class="flex mr-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="user-menu-button" aria-expanded="false" type="button" data-dropdown-toggle="dropdown">
