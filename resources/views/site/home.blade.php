@@ -45,19 +45,19 @@
       <div class="carousel-inner relative w-full overflow-hidden">
          <div class="carousel-item active float-left w-full">
             <img
-            src="https://ibb.co/3d9NZft"
+            src="https://i.ibb.co/qj3sQ0b/slide1.jpg"
             class="block w-full"
             alt="Estude"/>
          </div>
          <div class="carousel-item float-left w-full">
             <img
-            src="https://ibb.co/QprHLcB"
+            src="https://i.ibb.co/7j2pPzc/slide2.jpg"
             class="block w-full"
             alt="Estude Mais" />
          </div>
          <div class="carousel-item float-left w-full">
             <img
-            src="https://ibb.co/17xqSjY"
+            src="https://i.ibb.co/ydJy37m/slide3.jpg"
             class="block w-full"
             alt="Continue Estudando..."/>
          </div>
