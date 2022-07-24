@@ -66,7 +66,7 @@
                             mt-2
                             lg:mt-0
                             mr-1
-                        " href="/">
+                        " href="{{route(''home.index')}}">
                         <img src="{{url('/logo/logo-ebook.png')}}" style="height: 30px" alt=""
                         loading="lazy" />
                     </a>
