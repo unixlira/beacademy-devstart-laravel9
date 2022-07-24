@@ -8,7 +8,7 @@
 
     <div class="w-72 bg-white drop-shadow-md rounded-lg ...">
         <img class="m-auto object-cover rounded-tl-lg rounded-tr-lg"
-            src="{{ url('/storage/config.jpg') }}" />
+            src="https://i.ibb.co/WgSCSN9/config.jpg" />
         <div class="px-5 py-3 space-y-2">
 
             <hr>
@@ -23,7 +23,7 @@
 
     <div class="w-72 bg-white drop-shadow-md rounded-lg ...">
         <img class="m-auto object-cover rounded-tl-lg rounded-tr-lg"
-            src="{{ url('/storage/config-users.jpg') }}" />
+            src="https://i.ibb.co/bbNCLff/config-users.jpg" />
         <div class="px-5 py-3 space-y-2">
             <hr>
             <div class="flex  justify-between items-center pt-3 pb-2">
@@ -37,7 +37,7 @@
 
     <div class="w-72 bg-white drop-shadow-md rounded-lg ...">
         <img class="m-auto object-cover rounded-tl-lg rounded-tr-lg"
-            src="{{ url('/storage/config.jpg') }}" />
+            src="https://i.ibb.co/WgSCSN9/config.jpg" />
         <div class="px-5 py-3 space-y-2">
 
             <hr>
