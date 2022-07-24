@@ -81,9 +81,9 @@ class UsersController extends Controller
             $data['password'] = bcrypt($request->password);
 
         if ($request->image) {
-            $filename = app_path("users/{$user->image}");
-            if (File::exists($filename)) {
-                File::delete($filename);
+
+            if (file_exists($user->image)) {
+                unlink($user->image);
             }
 
             $data['image'] = $request->image->store('users', ['disk' => 'images']);

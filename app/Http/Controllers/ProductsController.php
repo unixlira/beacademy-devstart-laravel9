@@ -77,11 +77,9 @@ class ProductsController extends Controller
             $data['password'] = bcrypt($request->password);
 
         if ($request->image) {
-            $filename = app_path("products/{$product->image}");
-            if (File::exists($filename)) {
-                File::delete($filename);
+            if (file_exists($product->image)) {
+                unlink($product->image);
             }
-
             $data['image'] = $request->image->store('products', ['disk' => 'images']);
         }
 
