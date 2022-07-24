@@ -104,9 +104,9 @@
         <tr>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                 @if ($user->image)
-                    <img src="{{ $user->image }}" alt="{{ $user->name }}" class="object-cover w-20 rounded-full">
+                    <img src="{{url($user->image)}}" alt="{{ $user->name }}" class="object-cover w-20 rounded-full">
                 @else
-                <img src="https://i.ibb.co/Bwz0cHC/avatar.jpg" alt="{{ $user->name }}" class="object-cover w-20 rounded-full">
+                <img src="{{url('users/avatar.pnh)}}" alt="{{ $user->name }}" class="object-cover w-20 rounded-full">
                 @endif
             </td>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ $user->name }}</td>

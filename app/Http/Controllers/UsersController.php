@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUpdateUserFormRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -52,7 +53,7 @@ class UsersController extends Controller
         $data['remember_token'] = Str::random(10);
 
         if ($request->image) {
-            $data['image'] = $request->image->store('users');
+            $data['image'] = $request->image->store('users', ['disk' => 'images']);
         }
 
         $this->model->create($data);
@@ -80,11 +81,13 @@ class UsersController extends Controller
             $data['password'] = bcrypt($request->password);
 
         if ($request->image) {
-            if ($user->image && Storage::exists($user->image)) {
-                Storage::delete($user->image);
+            $filename = app_path("img/news/{$user->image}");
+            if (File::exists($filename)) {
+                File::delete($filename);
             }
 
-            $data['image'] = $request->image->store('users');
+            $data['image'] = $request->image->store('users', ['disk' => 'images']);
+
         }
 
         $data['is_admin'] = $request->admin ? 1 : 0;
