@@ -8,39 +8,50 @@ use Tests\TestCase;
 
 class UserTest extends TestCase
 {
-    /**
-     * A basic test user.
-     *
-     * @return void
-     */
-    public function test_user()
+    public function test_is_login_user()
     {
-        $user = User::factory()->create();
-
         $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'password',
+            'email'    => "joserobertolira@gmail.com",
+            'password' => "1q2w3e4r"
         ]);
-
-        $this->actingAs($user);
         
-        $this->assertAuthenticated();
-
         $response = $this->get('/users');
 
         $response->assertStatus(200);
     }
 
-
     public function test_create_user()
     {
-        $response = $this->post('/login/create', [
-            'name' => 'Admin',
-            'email' => 'unixlira@gmail.com',
-            'password' => '1q2w3e4r',
-            'is_admin' => 1
+
+        $response = $this->post('/login', [
+            'email'    => "joserobertolira@gmail.com",
+            'password' => "1q2w3e4r"
         ]);
 
+        $response = $this->get('/create');
+
+        $response->assertStatus(200);
+    }
+
+    public function test_store_user()
+    {
+
+        $response = $this->post('/login', [
+            'email'    => "joserobertolira@gmail.com",
+            'password' => "1q2w3e4r"
+        ]);
+        
+        $response = $this->post('/users', 
+        [     
+            "name" => "User Teste Lira",
+            "email" => "test@admin.com",
+            "email_verified_at" => now(),
+            "password" => "1q2w3e4r",
+            "remember_token" => "yovAaRo4kv",
+            "is_admin" => true
+        ]);
+
+        $response = $this->get('/users');
 
         $response->assertStatus(200);
     }

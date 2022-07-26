@@ -61,3 +61,6 @@ jobs:
       #- run: ./vendor/bin/phpunit
       - run: ./vendor/bin/codecept build
       - run: ./vendor/bin/codecept run
+
+      - store_test_results:
+        path: ./tests/Feature
