@@ -30,8 +30,6 @@ Route::middleware('auth')->prefix('site')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout/create', [CheckoutController::class, 'create'])->name('paylivre.create');
     
-
-
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
