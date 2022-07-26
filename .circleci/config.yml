@@ -23,8 +23,21 @@ jobs:
 
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+      - image: circleci/mysql:8.0.20-ram
+        command: mysqld --default-authentication-plugin=mysql_native_password
+        environment:
+          MYSQL_USER: bb96b1977df78d
+          MYSQL_DATABASE: heroku_b825a9efbe116f1
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_PASSWORD: '0c946da8'
     steps:
       - checkout
+
+      - run:
+          name: Install MySQL driver
+          command: |
+            sudo docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd
+            sudo docker-php-ext-install zip bcmath pdo_mysql
 
       - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
       - run: sudo docker-php-ext-install zip
@@ -55,19 +68,11 @@ jobs:
       - run: touch storage/testing.sqlite
       - run: php artisan migrate --env=testing --database=sqlite_testing --force
 
-      # run tests with phpunit or codecept
-      #- run: ./vendor/bin/phpunit
-      - run: ./vendor/bin/codecept build
-      - run: ./vendor/bin/codecept run
-
       - run:
-          shell: /bin/bash
           command: |
-            mkdir -p phpunit-out
-            vendor/bin/phpunit --log-junit phpunit-out/junit.xml
-            echo "done"
-          when: always
+            mkdir -p /phpunit &&
+            php -dzend_extension=xdebug.so vendor/bin/phpunit --coverage-clover=phpunit/coverage-clover.xml --coverage-html=phpunit/coverage
       - store_test_results:
-          path: phpunit-out
+          path: /phpunit
       - store_artifacts:
-          path: phpunit-out
+          path: /phpunit
