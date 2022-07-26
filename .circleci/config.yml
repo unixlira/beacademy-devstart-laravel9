@@ -68,11 +68,19 @@ jobs:
       - run: touch storage/testing.sqlite
       - run: php artisan migrate --env=testing --database=sqlite_testing --force
 
+      # run tests with phpunit or codecept
+      #- run: ./vendor/bin/phpunit
+      - run: ./vendor/bin/codecept build
+      - run: ./vendor/bin/codecept run
+
       - run:
+          shell: /bin/bash
           command: |
-            mkdir -p /phpunit &&
-            php -dzend_extension=xdebug.so vendor/bin/phpunit --coverage-clover=phpunit/coverage-clover.xml --coverage-html=phpunit/coverage
+            mkdir -p phpunit-out
+            vendor/bin/phpunit --log-junit phpunit-out/junit.xml
+            echo "done"
+          when: always
       - store_test_results:
-          path: /phpunit
+          path: phpunit-out
       - store_artifacts:
-          path: /phpunit
+          path: phpunit-out
