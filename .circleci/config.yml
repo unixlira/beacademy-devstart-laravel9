@@ -62,6 +62,14 @@ jobs:
       - run: ./vendor/bin/codecept build
       - run: ./vendor/bin/codecept run
 
+      - run:
+          shell: /bin/bash
+          command: |
+            mkdir -p phpunit-out
+            vendor/bin/phpunit --log-junit phpunit-out/junit.xml
+            echo "done"
+          when: always
       - store_test_results:
-        path: 
-        - ./tests/Feature
+          path: phpunit-out
+      - store_artifacts:
+          path: phpunit-out
