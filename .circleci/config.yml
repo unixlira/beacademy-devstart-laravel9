@@ -63,4 +63,5 @@ jobs:
       - run: ./vendor/bin/codecept run
 
       - store_test_results:
-        path: ./tests/Feature
+        path: 
+        - ./tests/Feature
