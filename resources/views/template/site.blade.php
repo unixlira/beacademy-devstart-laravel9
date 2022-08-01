@@ -92,7 +92,7 @@
                     <div class="dropdown relative">
                         <a class="dropdown-toggle flex items-center hidden-arrow" href="#" id="dropdownMenuButton2" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ url(Auth::user()->image) }}" class="rounded-full"
+                            <img src="{{ url(Auth::user()->image ?? '') }}" class="rounded-full"
                                 style="height: 25px; width: 25px" alt="" loading="lazy" />
                         </a>
                         <ul class="

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\OrderProduct;
-use App\Models\OrderUser;
+use App\Models\OrdersProducts;
+use App\Models\OrdersUsers;
 use App\Models\Product;
 use App\Models\User;
 use Exception;
@@ -17,10 +17,10 @@ class OrdersController extends Controller
     protected $order_user;
     protected $order_product;
 
-    public function __construct(Order $order, OrderProduct $order_product, OrderUser $order_user)
+    public function __construct(Order $order, OrdersProducts $order_product, OrdersUsers $orders_users)
     {
         $this->model = $order;
-        $this->order_user = $order_user;
+        $this->order_user = $orders_users;
         $this->order_product = $order_product;
     }
 

@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OrderProduct extends Model
+class OrdersProducts extends Model
 {
     use HasFactory;
 
-    protected $table = 'order_product';
+    protected $table = 'orders_products';
 
     protected $fillable = [
         'order_id',
@@ -24,10 +24,10 @@ class OrderProduct extends Model
             return redirect()->route('products.index');
 
         foreach ($products as $product) {
-            $orderProduct = new OrderProduct();
-            $orderProduct->order_id = $order->id;
-            $orderProduct->product_id = $product['id'];
-            $orderProduct->save();
+            $ordersProducts = new OrdersProducts();
+            $ordersProducts->order_id = $order->id;
+            $ordersProducts->product_id = $product['id'];
+            $ordersProducts->save();
         }
     }
 }

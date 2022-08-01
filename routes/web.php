@@ -17,8 +17,6 @@ require __DIR__.'/auth.php';
 
 Route::get('/', [HomeController::class, 'index']);
 
-
-
 Route::middleware('auth')->prefix('site')->group(function () {
     Route::get('/', [HomeController::class, 'home'])->name('home.index');
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -29,6 +27,10 @@ Route::middleware('auth')->prefix('site')->group(function () {
 
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout/create', [CheckoutController::class, 'create'])->name('paylivre.create');
+    
+    //CHECKOUT
+    Route::post('/payment/ticket', [CheckoutController::class, 'ticket'])->name('payment.ticket');
+    Route::post('/payment/card', [CheckoutController::class, 'card'])->name('payment.card');
     
 });
 

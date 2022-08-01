@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\OrderProduct;
-use App\Models\OrderUser;
+use App\Models\OrdersProducts;
+use App\Models\OrdersUsers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,13 +14,14 @@ class CartController extends Controller
 
     protected $order;
     protected $orderUser;
-    protected $orderProduct;
+    protected $ordersProducts;
 
-    public function __construct(Order $order, OrderProduct $orderProduct, OrderUser $orderUser)
+    public function __construct(Order $order, OrdersProducts $ordersProducts, OrdersUsers $ordersUsers)
     {
+        
         $this->model = $order;
-        $this->orderUser = $orderUser;
-        $this->orderProduct = $orderProduct;
+        $this->ordersUsers = $ordersUsers;
+        $this->ordersProducts = $ordersProducts;
     }
 
     public function index()
@@ -64,8 +65,8 @@ class CartController extends Controller
     {
 
         $order = $this->model->store($request);
-        $this->orderUser->store($order);
-        $this->orderProduct->store($order);
+        $this->ordersUsers->store($order);
+        $this->ordersProducts->store($order);
         session()->push('order', $order);
         session()->forget('cart');
 
