@@ -538,8 +538,23 @@ function directive(name, callback) {
   directiveHandlers[name] = callback;
 }
 function directives(el, attributes, originalAttributeOverride) {
+  attributes = Array.from(attributes);
+  if (el._x_virtualDirectives) {
+    let vAttributes = Object.entries(el._x_virtualDirectives).map(([name, value]) => ({name, value}));
+    let staticAttributes = attributesOnly(vAttributes);
+    vAttributes = vAttributes.map((attribute) => {
+      if (staticAttributes.find((attr) => attr.name === attribute.name)) {
+        return {
+          name: `x-bind:${attribute.name}`,
+          value: `"${attribute.value}"`
+        };
+      }
+      return attribute;
+    });
+    attributes = attributes.concat(vAttributes);
+  }
   let transformedAttributeMap = {};
-  let directives2 = Array.from(attributes).map(toTransformedAttributes((newName, oldName) => transformedAttributeMap[newName] = oldName)).filter(outNonAlpineAttributes).map(toParsedDirectives(transformedAttributeMap, originalAttributeOverride)).sort(byPriority);
+  let directives2 = attributes.map(toTransformedAttributes((newName, oldName) => transformedAttributeMap[newName] = oldName)).filter(outNonAlpineAttributes).map(toParsedDirectives(transformedAttributeMap, originalAttributeOverride)).sort(byPriority);
   return directives2.map((directive2) => {
     return getDirectiveHandler(el, directive2);
   });
@@ -654,8 +669,7 @@ var directiveOrder = [
   "show",
   "if",
   DEFAULT,
-  "teleport",
-  "element"
+  "teleport"
 ];
 function byPriority(a, b) {
   let typeA = directiveOrder.indexOf(a.type) === -1 ? DEFAULT : a.type;
@@ -1000,9 +1014,8 @@ function registerTransitionObject(el, setFunction, defaultValue = {}) {
     };
 }
 window.Element.prototype._x_toggleAndCascadeWithTransitions = function(el, value, show, hide) {
-  let clickAwayCompatibleShow = () => {
-    document.visibilityState === "visible" ? requestAnimationFrame(show) : setTimeout(show);
-  };
+  const nextTick2 = document.visibilityState === "visible" ? requestAnimationFrame : setTimeout;
+  let clickAwayCompatibleShow = () => nextTick2(show);
   if (value) {
     if (el._x_transition && (el._x_transition.enter || el._x_transition.leave)) {
       el._x_transition.enter && (Object.entries(el._x_transition.enter.during).length || Object.entries(el._x_transition.enter.start).length || Object.entries(el._x_transition.enter.end).length) ? el._x_transition.in(show) : clickAwayCompatibleShow();
@@ -1023,7 +1036,7 @@ window.Element.prototype._x_toggleAndCascadeWithTransitions = function(el, value
         closest._x_hideChildren = [];
       closest._x_hideChildren.push(el);
     } else {
-      queueMicrotask(() => {
+      nextTick2(() => {
         let hideAfterChildren = (el2) => {
           let carry = Promise.all([
             el2._x_hidePromise,
@@ -1387,8 +1400,13 @@ function getStores() {
 
 // packages/alpinejs/src/binds.js
 var binds = {};
-function bind2(name, object) {
-  binds[name] = typeof object !== "function" ? () => object : object;
+function bind2(name, bindings) {
+  let getBindings = typeof bindings !== "function" ? () => bindings : bindings;
+  if (name instanceof Element) {
+    applyBindingsObject(name, getBindings());
+  } else {
+    binds[name] = getBindings;
+  }
 }
 function injectBindingProviders(obj) {
   Object.entries(binds).forEach(([name, callback]) => {
@@ -1401,6 +1419,26 @@ function injectBindingProviders(obj) {
     });
   });
   return obj;
+}
+function applyBindingsObject(el, obj, original) {
+  let cleanupRunners = [];
+  while (cleanupRunners.length)
+    cleanupRunners.pop()();
+  let attributes = Object.entries(obj).map(([name, value]) => ({name, value}));
+  let staticAttributes = attributesOnly(attributes);
+  attributes = attributes.map((attribute) => {
+    if (staticAttributes.find((attr) => attr.name === attribute.name)) {
+      return {
+        name: `x-bind:${attribute.name}`,
+        value: `"${attribute.value}"`
+      };
+    }
+    return attribute;
+  });
+  directives(el, attributes, original).map((handle) => {
+    cleanupRunners.push(handle.runCleanups);
+    handle();
+  });
 }
 
 // packages/alpinejs/src/datas.js
@@ -1436,7 +1474,7 @@ var Alpine = {
   get raw() {
     return raw;
   },
-  version: "3.10.0",
+  version: "3.10.3",
   flushAndStopDeferringMutations,
   dontAutoEvaluateFunctions,
   disableEffectScheduling,
@@ -1509,8 +1547,8 @@ var slotFlagsText = {
 };
 var specialBooleanAttrs = `itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly`;
 var isBooleanAttr2 = /* @__PURE__ */ makeMap(specialBooleanAttrs + `,async,autofocus,autoplay,controls,default,defer,disabled,hidden,loop,open,required,reversed,scoped,seamless,checked,muted,multiple,selected`);
-var EMPTY_OBJ =  false ? 0 : {};
-var EMPTY_ARR =  false ? 0 : [];
+var EMPTY_OBJ =  true ? Object.freeze({}) : 0;
+var EMPTY_ARR =  true ? Object.freeze([]) : 0;
 var extend = Object.assign;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var hasOwn = (val, key) => hasOwnProperty.call(val, key);
@@ -1546,8 +1584,8 @@ var hasChanged = (value, oldValue) => value !== oldValue && (value === value || 
 var targetMap = new WeakMap();
 var effectStack = [];
 var activeEffect;
-var ITERATE_KEY = Symbol( false ? 0 : "");
-var MAP_KEY_ITERATE_KEY = Symbol( false ? 0 : "");
+var ITERATE_KEY = Symbol( true ? "iterate" : 0);
+var MAP_KEY_ITERATE_KEY = Symbol( true ? "Map key iterate" : 0);
 function isEffect(fn) {
   return fn && fn._isEffect === true;
 }
@@ -1637,7 +1675,14 @@ function track(target, type, key) {
   if (!dep.has(activeEffect)) {
     dep.add(activeEffect);
     activeEffect.deps.push(dep);
-    if (false) {}
+    if (activeEffect.options.onTrack) {
+      activeEffect.options.onTrack({
+        effect: activeEffect,
+        target,
+        type,
+        key
+      });
+    }
   }
 }
 function trigger(target, type, key, newValue, oldValue, oldTarget) {
@@ -1694,7 +1739,17 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
     }
   }
   const run = (effect3) => {
-    if (false) {}
+    if (effect3.options.onTrigger) {
+      effect3.options.onTrigger({
+        effect: effect3,
+        target,
+        key,
+        type,
+        newValue,
+        oldValue,
+        oldTarget
+      });
+    }
     if (effect3.options.scheduler) {
       effect3.options.scheduler(effect3);
     } else {
@@ -1822,11 +1877,15 @@ var mutableHandlers = {
 var readonlyHandlers = {
   get: readonlyGet,
   set(target, key) {
-    if (false) {}
+    if (true) {
+      console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`, target);
+    }
     return true;
   },
   deleteProperty(target, key) {
-    if (false) {}
+    if (true) {
+      console.warn(`Delete operation on key "${String(key)}" failed: target is readonly.`, target);
+    }
     return true;
   }
 };
@@ -1893,7 +1952,9 @@ function set$1(key, value) {
   if (!hadKey) {
     key = toRaw(key);
     hadKey = has2.call(target, key);
-  } else if (false) {}
+  } else if (true) {
+    checkIdentityKeys(target, has2, key);
+  }
   const oldValue = get3.call(target, key);
   target.set(key, value);
   if (!hadKey) {
@@ -1910,7 +1971,9 @@ function deleteEntry(key) {
   if (!hadKey) {
     key = toRaw(key);
     hadKey = has2.call(target, key);
-  } else if (false) {}
+  } else if (true) {
+    checkIdentityKeys(target, has2, key);
+  }
   const oldValue = get3 ? get3.call(target, key) : void 0;
   const result = target.delete(key);
   if (hadKey) {
@@ -1921,7 +1984,7 @@ function deleteEntry(key) {
 function clear() {
   const target = toRaw(this);
   const hadItems = target.size !== 0;
-  const oldTarget =  false ? 0 : void 0;
+  const oldTarget =  true ? isMap(target) ? new Map(target) : new Set(target) : 0;
   const result = target.clear();
   if (hadItems) {
     trigger(target, "clear", void 0, void 0, oldTarget);
@@ -1966,7 +2029,10 @@ function createIterableMethod(method, isReadonly, isShallow) {
 }
 function createReadonlyMethod(type) {
   return function(...args) {
-    if (false) {}
+    if (true) {
+      const key = args[0] ? `on key "${args[0]}" ` : ``;
+      console.warn(`${capitalize(type)} operation ${key}failed: target is readonly.`, toRaw(this));
+    }
     return type === "delete" ? false : this;
   };
 }
@@ -2062,6 +2128,13 @@ var readonlyCollectionHandlers = {
 var shallowReadonlyCollectionHandlers = {
   get: createInstrumentationGetter(true, true)
 };
+function checkIdentityKeys(target, has2, key) {
+  const rawKey = toRaw(key);
+  if (rawKey !== key && has2.call(target, rawKey)) {
+    const type = toRawType(target);
+    console.warn(`Reactive ${type} contains both the raw and reactive versions of the same object${type === `Map` ? ` as keys` : ``}, which can lead to inconsistencies. Avoid differentiating between the raw and reactive versions of an object and only use the reactive version if possible.`);
+  }
+}
 var reactiveMap = new WeakMap();
 var shallowReactiveMap = new WeakMap();
 var readonlyMap = new WeakMap();
@@ -2094,7 +2167,9 @@ function readonly(target) {
 }
 function createReactiveObject(target, isReadonly, baseHandlers, collectionHandlers, proxyMap) {
   if (!isObject(target)) {
-    if (false) {}
+    if (true) {
+      console.warn(`value cannot be made reactive: ${String(target)}`);
+    }
     return target;
   }
   if (target["__v_raw"] && !(isReadonly && target["__v_isReactive"])) {
@@ -2548,7 +2623,13 @@ directive("html", (el, {expression}, {effect: effect3, evaluateLater: evaluateLa
 mapAttributes(startingWith(":", into(prefix("bind:"))));
 directive("bind", (el, {value, modifiers, expression, original}, {effect: effect3}) => {
   if (!value) {
-    return applyBindingsObject(el, expression, original, effect3);
+    let bindingProviders = {};
+    injectBindingProviders(bindingProviders);
+    let getBindings = evaluateLater(el, expression);
+    getBindings((bindings) => {
+      applyBindingsObject(el, bindings, original);
+    }, {scope: bindingProviders});
+    return;
   }
   if (value === "key")
     return storeKeyForXFor(el, expression);
@@ -2559,31 +2640,6 @@ directive("bind", (el, {value, modifiers, expression, original}, {effect: effect
     mutateDom(() => bind(el, value, result, modifiers));
   }));
 });
-function applyBindingsObject(el, expression, original, effect3) {
-  let bindingProviders = {};
-  injectBindingProviders(bindingProviders);
-  let getBindings = evaluateLater(el, expression);
-  let cleanupRunners = [];
-  while (cleanupRunners.length)
-    cleanupRunners.pop()();
-  getBindings((bindings) => {
-    let attributes = Object.entries(bindings).map(([name, value]) => ({name, value}));
-    let staticAttributes = attributesOnly(attributes);
-    attributes = attributes.map((attribute) => {
-      if (staticAttributes.find((attr) => attr.name === attribute.name)) {
-        return {
-          name: `x-bind:${attribute.name}`,
-          value: `"${attribute.value}"`
-        };
-      }
-      return attribute;
-    });
-    directives(el, attributes, original).map((handle) => {
-      cleanupRunners.push(handle.runCleanups);
-      handle();
-    });
-  }, {scope: bindingProviders});
-}
 function storeKeyForXFor(el, expression) {
   el._x_keyExpression = expression;
 }
@@ -2615,7 +2671,9 @@ directive("show", (el, {modifiers, expression}, {effect: effect3}) => {
   let evaluate2 = evaluateLater(el, expression);
   if (!el._x_doHide)
     el._x_doHide = () => {
-      mutateDom(() => el.style.display = "none");
+      mutateDom(() => {
+        el.style.setProperty("display", "none", modifiers.includes("important") ? "important" : void 0);
+      });
     };
   if (!el._x_doShow)
     el._x_doShow = () => {
@@ -2939,12 +2997,24 @@ var buildFullPath = __webpack_require__(/*! ../core/buildFullPath */ "./node_mod
 var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ "./node_modules/axios/lib/helpers/parseHeaders.js");
 var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ "./node_modules/axios/lib/helpers/isURLSameOrigin.js");
 var createError = __webpack_require__(/*! ../core/createError */ "./node_modules/axios/lib/core/createError.js");
+var defaults = __webpack_require__(/*! ../defaults */ "./node_modules/axios/lib/defaults.js");
+var Cancel = __webpack_require__(/*! ../cancel/Cancel */ "./node_modules/axios/lib/cancel/Cancel.js");
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
     var requestData = config.data;
     var requestHeaders = config.headers;
     var responseType = config.responseType;
+    var onCanceled;
+    function done() {
+      if (config.cancelToken) {
+        config.cancelToken.unsubscribe(onCanceled);
+      }
+
+      if (config.signal) {
+        config.signal.removeEventListener('abort', onCanceled);
+      }
+    }
 
     if (utils.isFormData(requestData)) {
       delete requestHeaders['Content-Type']; // Let the browser set it
@@ -2982,7 +3052,13 @@ module.exports = function xhrAdapter(config) {
         request: request
       };
 
-      settle(resolve, reject, response);
+      settle(function _resolve(value) {
+        resolve(value);
+        done();
+      }, function _reject(err) {
+        reject(err);
+        done();
+      }, response);
 
       // Clean up request
       request = null;
@@ -3035,14 +3111,15 @@ module.exports = function xhrAdapter(config) {
 
     // Handle timeout
     request.ontimeout = function handleTimeout() {
-      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      var timeoutErrorMessage = config.timeout ? 'timeout of ' + config.timeout + 'ms exceeded' : 'timeout exceeded';
+      var transitional = config.transitional || defaults.transitional;
       if (config.timeoutErrorMessage) {
         timeoutErrorMessage = config.timeoutErrorMessage;
       }
       reject(createError(
         timeoutErrorMessage,
         config,
-        config.transitional && config.transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
+        transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
         request));
 
       // Clean up request
@@ -3096,18 +3173,22 @@ module.exports = function xhrAdapter(config) {
       request.upload.addEventListener('progress', config.onUploadProgress);
     }
 
-    if (config.cancelToken) {
+    if (config.cancelToken || config.signal) {
       // Handle cancellation
-      config.cancelToken.promise.then(function onCanceled(cancel) {
+      // eslint-disable-next-line func-names
+      onCanceled = function(cancel) {
         if (!request) {
           return;
         }
-
+        reject(!cancel || (cancel && cancel.type) ? new Cancel('canceled') : cancel);
         request.abort();
-        reject(cancel);
-        // Clean up request
         request = null;
-      });
+      };
+
+      config.cancelToken && config.cancelToken.subscribe(onCanceled);
+      if (config.signal) {
+        config.signal.aborted ? onCanceled() : config.signal.addEventListener('abort', onCanceled);
+      }
     }
 
     if (!requestData) {
@@ -3153,6 +3234,11 @@ function createInstance(defaultConfig) {
   // Copy context to instance
   utils.extend(instance, context);
 
+  // Factory for creating new instances
+  instance.create = function create(instanceConfig) {
+    return createInstance(mergeConfig(defaultConfig, instanceConfig));
+  };
+
   return instance;
 }
 
@@ -3162,15 +3248,11 @@ var axios = createInstance(defaults);
 // Expose Axios class to allow class inheritance
 axios.Axios = Axios;
 
-// Factory for creating new instances
-axios.create = function create(instanceConfig) {
-  return createInstance(mergeConfig(axios.defaults, instanceConfig));
-};
-
 // Expose Cancel & CancelToken
 axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ "./node_modules/axios/lib/cancel/Cancel.js");
 axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ "./node_modules/axios/lib/cancel/CancelToken.js");
 axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ "./node_modules/axios/lib/cancel/isCancel.js");
+axios.VERSION = (__webpack_require__(/*! ./env/data */ "./node_modules/axios/lib/env/data.js").version);
 
 // Expose all/spread
 axios.all = function all(promises) {
@@ -3242,11 +3324,42 @@ function CancelToken(executor) {
   }
 
   var resolvePromise;
+
   this.promise = new Promise(function promiseExecutor(resolve) {
     resolvePromise = resolve;
   });
 
   var token = this;
+
+  // eslint-disable-next-line func-names
+  this.promise.then(function(cancel) {
+    if (!token._listeners) return;
+
+    var i;
+    var l = token._listeners.length;
+
+    for (i = 0; i < l; i++) {
+      token._listeners[i](cancel);
+    }
+    token._listeners = null;
+  });
+
+  // eslint-disable-next-line func-names
+  this.promise.then = function(onfulfilled) {
+    var _resolve;
+    // eslint-disable-next-line func-names
+    var promise = new Promise(function(resolve) {
+      token.subscribe(resolve);
+      _resolve = resolve;
+    }).then(onfulfilled);
+
+    promise.cancel = function reject() {
+      token.unsubscribe(_resolve);
+    };
+
+    return promise;
+  };
+
   executor(function cancel(message) {
     if (token.reason) {
       // Cancellation has already been requested
@@ -3264,6 +3377,37 @@ function CancelToken(executor) {
 CancelToken.prototype.throwIfRequested = function throwIfRequested() {
   if (this.reason) {
     throw this.reason;
+  }
+};
+
+/**
+ * Subscribe to the cancel signal
+ */
+
+CancelToken.prototype.subscribe = function subscribe(listener) {
+  if (this.reason) {
+    listener(this.reason);
+    return;
+  }
+
+  if (this._listeners) {
+    this._listeners.push(listener);
+  } else {
+    this._listeners = [listener];
+  }
+};
+
+/**
+ * Unsubscribe from the cancel signal
+ */
+
+CancelToken.prototype.unsubscribe = function unsubscribe(listener) {
+  if (!this._listeners) {
+    return;
+  }
+  var index = this._listeners.indexOf(listener);
+  if (index !== -1) {
+    this._listeners.splice(index, 1);
   }
 };
 
@@ -3338,14 +3482,18 @@ function Axios(instanceConfig) {
  *
  * @param {Object} config The config specific for this request (merged with this.defaults)
  */
-Axios.prototype.request = function request(config) {
+Axios.prototype.request = function request(configOrUrl, config) {
   /*eslint no-param-reassign:0*/
   // Allow for axios('example/url'[, config]) a la fetch API
-  if (typeof config === 'string') {
-    config = arguments[1] || {};
-    config.url = arguments[0];
-  } else {
+  if (typeof configOrUrl === 'string') {
     config = config || {};
+    config.url = configOrUrl;
+  } else {
+    config = configOrUrl || {};
+  }
+
+  if (!config.url) {
+    throw new Error('Provided config url is not valid');
   }
 
   config = mergeConfig(this.defaults, config);
@@ -3363,9 +3511,9 @@ Axios.prototype.request = function request(config) {
 
   if (transitional !== undefined) {
     validator.assertOptions(transitional, {
-      silentJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
-      forcedJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
-      clarifyTimeoutError: validators.transitional(validators.boolean, '1.0.0')
+      silentJSONParsing: validators.transitional(validators.boolean),
+      forcedJSONParsing: validators.transitional(validators.boolean),
+      clarifyTimeoutError: validators.transitional(validators.boolean)
     }, false);
   }
 
@@ -3430,6 +3578,9 @@ Axios.prototype.request = function request(config) {
 };
 
 Axios.prototype.getUri = function getUri(config) {
+  if (!config.url) {
+    throw new Error('Provided config url is not valid');
+  }
   config = mergeConfig(this.defaults, config);
   return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
 };
@@ -3600,6 +3751,7 @@ var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/util
 var transformData = __webpack_require__(/*! ./transformData */ "./node_modules/axios/lib/core/transformData.js");
 var isCancel = __webpack_require__(/*! ../cancel/isCancel */ "./node_modules/axios/lib/cancel/isCancel.js");
 var defaults = __webpack_require__(/*! ../defaults */ "./node_modules/axios/lib/defaults.js");
+var Cancel = __webpack_require__(/*! ../cancel/Cancel */ "./node_modules/axios/lib/cancel/Cancel.js");
 
 /**
  * Throws a `Cancel` if cancellation has been requested.
@@ -3607,6 +3759,10 @@ var defaults = __webpack_require__(/*! ../defaults */ "./node_modules/axios/lib/
 function throwIfCancellationRequested(config) {
   if (config.cancelToken) {
     config.cancelToken.throwIfRequested();
+  }
+
+  if (config.signal && config.signal.aborted) {
+    throw new Cancel('canceled');
   }
 }
 
@@ -3724,7 +3880,8 @@ module.exports = function enhanceError(error, config, code, request, response) {
       stack: this.stack,
       // Axios
       config: this.config,
-      code: this.code
+      code: this.code,
+      status: this.response && this.response.status ? this.response.status : null
     };
   };
   return error;
@@ -3757,17 +3914,6 @@ module.exports = function mergeConfig(config1, config2) {
   config2 = config2 || {};
   var config = {};
 
-  var valueFromConfig2Keys = ['url', 'method', 'data'];
-  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy', 'params'];
-  var defaultToConfig2Keys = [
-    'baseURL', 'transformRequest', 'transformResponse', 'paramsSerializer',
-    'timeout', 'timeoutMessage', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
-    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress', 'decompress',
-    'maxContentLength', 'maxBodyLength', 'maxRedirects', 'transport', 'httpAgent',
-    'httpsAgent', 'cancelToken', 'socketPath', 'responseEncoding'
-  ];
-  var directMergeKeys = ['validateStatus'];
-
   function getMergedValue(target, source) {
     if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
       return utils.merge(target, source);
@@ -3779,51 +3925,74 @@ module.exports = function mergeConfig(config1, config2) {
     return source;
   }
 
+  // eslint-disable-next-line consistent-return
   function mergeDeepProperties(prop) {
     if (!utils.isUndefined(config2[prop])) {
-      config[prop] = getMergedValue(config1[prop], config2[prop]);
+      return getMergedValue(config1[prop], config2[prop]);
     } else if (!utils.isUndefined(config1[prop])) {
-      config[prop] = getMergedValue(undefined, config1[prop]);
+      return getMergedValue(undefined, config1[prop]);
     }
   }
 
-  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+  // eslint-disable-next-line consistent-return
+  function valueFromConfig2(prop) {
     if (!utils.isUndefined(config2[prop])) {
-      config[prop] = getMergedValue(undefined, config2[prop]);
+      return getMergedValue(undefined, config2[prop]);
     }
-  });
+  }
 
-  utils.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
-
-  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+  // eslint-disable-next-line consistent-return
+  function defaultToConfig2(prop) {
     if (!utils.isUndefined(config2[prop])) {
-      config[prop] = getMergedValue(undefined, config2[prop]);
+      return getMergedValue(undefined, config2[prop]);
     } else if (!utils.isUndefined(config1[prop])) {
-      config[prop] = getMergedValue(undefined, config1[prop]);
+      return getMergedValue(undefined, config1[prop]);
     }
-  });
+  }
 
-  utils.forEach(directMergeKeys, function merge(prop) {
+  // eslint-disable-next-line consistent-return
+  function mergeDirectKeys(prop) {
     if (prop in config2) {
-      config[prop] = getMergedValue(config1[prop], config2[prop]);
+      return getMergedValue(config1[prop], config2[prop]);
     } else if (prop in config1) {
-      config[prop] = getMergedValue(undefined, config1[prop]);
+      return getMergedValue(undefined, config1[prop]);
     }
+  }
+
+  var mergeMap = {
+    'url': valueFromConfig2,
+    'method': valueFromConfig2,
+    'data': valueFromConfig2,
+    'baseURL': defaultToConfig2,
+    'transformRequest': defaultToConfig2,
+    'transformResponse': defaultToConfig2,
+    'paramsSerializer': defaultToConfig2,
+    'timeout': defaultToConfig2,
+    'timeoutMessage': defaultToConfig2,
+    'withCredentials': defaultToConfig2,
+    'adapter': defaultToConfig2,
+    'responseType': defaultToConfig2,
+    'xsrfCookieName': defaultToConfig2,
+    'xsrfHeaderName': defaultToConfig2,
+    'onUploadProgress': defaultToConfig2,
+    'onDownloadProgress': defaultToConfig2,
+    'decompress': defaultToConfig2,
+    'maxContentLength': defaultToConfig2,
+    'maxBodyLength': defaultToConfig2,
+    'transport': defaultToConfig2,
+    'httpAgent': defaultToConfig2,
+    'httpsAgent': defaultToConfig2,
+    'cancelToken': defaultToConfig2,
+    'socketPath': defaultToConfig2,
+    'responseEncoding': defaultToConfig2,
+    'validateStatus': mergeDirectKeys
+  };
+
+  utils.forEach(Object.keys(config1).concat(Object.keys(config2)), function computeConfigValue(prop) {
+    var merge = mergeMap[prop] || mergeDeepProperties;
+    var configValue = merge(prop);
+    (utils.isUndefined(configValue) && merge !== mergeDirectKeys) || (config[prop] = configValue);
   });
-
-  var axiosKeys = valueFromConfig2Keys
-    .concat(mergeDeepPropertiesKeys)
-    .concat(defaultToConfig2Keys)
-    .concat(directMergeKeys);
-
-  var otherKeys = Object
-    .keys(config1)
-    .concat(Object.keys(config2))
-    .filter(function filterAxiosKeys(key) {
-      return axiosKeys.indexOf(key) === -1;
-    });
-
-  utils.forEach(otherKeys, mergeDeepProperties);
 
   return config;
 };
@@ -3989,7 +4158,7 @@ var defaults = {
   }],
 
   transformResponse: [function transformResponse(data) {
-    var transitional = this.transitional;
+    var transitional = this.transitional || defaults.transitional;
     var silentJSONParsing = transitional && transitional.silentJSONParsing;
     var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
     var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
@@ -4024,12 +4193,12 @@ var defaults = {
 
   validateStatus: function validateStatus(status) {
     return status >= 200 && status < 300;
-  }
-};
+  },
 
-defaults.headers = {
-  common: {
-    'Accept': 'application/json, text/plain, */*'
+  headers: {
+    common: {
+      'Accept': 'application/json, text/plain, */*'
+    }
   }
 };
 
@@ -4043,6 +4212,18 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = defaults;
 
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/env/data.js":
+/*!********************************************!*\
+  !*** ./node_modules/axios/lib/env/data.js ***!
+  \********************************************/
+/***/ ((module) => {
+
+module.exports = {
+  "version": "0.25.0"
+};
 
 /***/ }),
 
@@ -4257,7 +4438,7 @@ module.exports = function isAbsoluteURL(url) {
   // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
   // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
   // by any combination of letters, digits, plus, period, or hyphen.
-  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
 };
 
 
@@ -4267,10 +4448,12 @@ module.exports = function isAbsoluteURL(url) {
 /*!********************************************************!*\
   !*** ./node_modules/axios/lib/helpers/isAxiosError.js ***!
   \********************************************************/
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
 
 /**
  * Determines whether the payload is an error thrown by Axios
@@ -4279,7 +4462,7 @@ module.exports = function isAbsoluteURL(url) {
  * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
  */
 module.exports = function isAxiosError(payload) {
-  return (typeof payload === 'object') && (payload.isAxiosError === true);
+  return utils.isObject(payload) && (payload.isAxiosError === true);
 };
 
 
@@ -4498,7 +4681,7 @@ module.exports = function spread(callback) {
 "use strict";
 
 
-var pkg = __webpack_require__(/*! ./../../package.json */ "./node_modules/axios/package.json");
+var VERSION = (__webpack_require__(/*! ../env/data */ "./node_modules/axios/lib/env/data.js").version);
 
 var validators = {};
 
@@ -4510,48 +4693,26 @@ var validators = {};
 });
 
 var deprecatedWarnings = {};
-var currentVerArr = pkg.version.split('.');
-
-/**
- * Compare package versions
- * @param {string} version
- * @param {string?} thanVersion
- * @returns {boolean}
- */
-function isOlderVersion(version, thanVersion) {
-  var pkgVersionArr = thanVersion ? thanVersion.split('.') : currentVerArr;
-  var destVer = version.split('.');
-  for (var i = 0; i < 3; i++) {
-    if (pkgVersionArr[i] > destVer[i]) {
-      return true;
-    } else if (pkgVersionArr[i] < destVer[i]) {
-      return false;
-    }
-  }
-  return false;
-}
 
 /**
  * Transitional option validator
- * @param {function|boolean?} validator
- * @param {string?} version
- * @param {string} message
+ * @param {function|boolean?} validator - set to false if the transitional option has been removed
+ * @param {string?} version - deprecated version / removed since version
+ * @param {string?} message - some message with additional info
  * @returns {function}
  */
 validators.transitional = function transitional(validator, version, message) {
-  var isDeprecated = version && isOlderVersion(version);
-
   function formatMessage(opt, desc) {
-    return '[Axios v' + pkg.version + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
+    return '[Axios v' + VERSION + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
   }
 
   // eslint-disable-next-line func-names
   return function(value, opt, opts) {
     if (validator === false) {
-      throw new Error(formatMessage(opt, ' has been removed in ' + version));
+      throw new Error(formatMessage(opt, ' has been removed' + (version ? ' in ' + version : '')));
     }
 
-    if (isDeprecated && !deprecatedWarnings[opt]) {
+    if (version && !deprecatedWarnings[opt]) {
       deprecatedWarnings[opt] = true;
       // eslint-disable-next-line no-console
       console.warn(
@@ -4597,7 +4758,6 @@ function assertOptions(options, schema, allowUnknown) {
 }
 
 module.exports = {
-  isOlderVersion: isOlderVersion,
   assertOptions: assertOptions,
   validators: validators
 };
@@ -4627,7 +4787,7 @@ var toString = Object.prototype.toString;
  * @returns {boolean} True if value is an Array, otherwise false
  */
 function isArray(val) {
-  return toString.call(val) === '[object Array]';
+  return Array.isArray(val);
 }
 
 /**
@@ -4668,7 +4828,7 @@ function isArrayBuffer(val) {
  * @returns {boolean} True if value is an FormData, otherwise false
  */
 function isFormData(val) {
-  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+  return toString.call(val) === '[object FormData]';
 }
 
 /**
@@ -4682,7 +4842,7 @@ function isArrayBufferView(val) {
   if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
     result = ArrayBuffer.isView(val);
   } else {
-    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+    result = (val) && (val.buffer) && (isArrayBuffer(val.buffer));
   }
   return result;
 }
@@ -4789,7 +4949,7 @@ function isStream(val) {
  * @returns {boolean} True if value is a URLSearchParams object, otherwise false
  */
 function isURLSearchParams(val) {
-  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+  return toString.call(val) === '[object URLSearchParams]';
 }
 
 /**
@@ -22430,17 +22590,6 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-
-/***/ }),
-
-/***/ "./node_modules/axios/package.json":
-/*!*****************************************!*\
-  !*** ./node_modules/axios/package.json ***!
-  \*****************************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = JSON.parse('{"_from":"axios@^0.21","_id":"axios@0.21.4","_inBundle":false,"_integrity":"sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==","_location":"/axios","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"axios@^0.21","name":"axios","escapedName":"axios","rawSpec":"^0.21","saveSpec":null,"fetchSpec":"^0.21"},"_requiredBy":["#DEV:/"],"_resolved":"https://registry.npmjs.org/axios/-/axios-0.21.4.tgz","_shasum":"c67b90dc0568e5c1cf2b0b858c43ba28e2eda575","_spec":"axios@^0.21","_where":"/var/www/html/be-academy/laravel9","author":{"name":"Matt Zabriskie"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"bugs":{"url":"https://github.com/axios/axios/issues"},"bundleDependencies":false,"bundlesize":[{"path":"./dist/axios.min.js","threshold":"5kB"}],"dependencies":{"follow-redirects":"^1.14.0"},"deprecated":false,"description":"Promise based HTTP client for the browser and node.js","devDependencies":{"coveralls":"^3.0.0","es6-promise":"^4.2.4","grunt":"^1.3.0","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^23.0.0","grunt-karma":"^4.0.0","grunt-mocha-test":"^0.13.3","grunt-ts":"^6.0.0-beta.19","grunt-webpack":"^4.0.2","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^6.3.2","karma-chrome-launcher":"^3.1.0","karma-firefox-launcher":"^2.1.0","karma-jasmine":"^1.1.1","karma-jasmine-ajax":"^0.1.13","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^4.3.6","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.8","karma-webpack":"^4.0.2","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","mocha":"^8.2.1","sinon":"^4.5.0","terser-webpack-plugin":"^4.2.3","typescript":"^4.0.5","url-search-params":"^0.10.0","webpack":"^4.44.2","webpack-dev-server":"^3.11.0"},"homepage":"https://axios-http.com","jsdelivr":"dist/axios.min.js","keywords":["xhr","http","ajax","promise","node"],"license":"MIT","main":"index.js","name":"axios","repository":{"type":"git","url":"git+https://github.com/axios/axios.git"},"scripts":{"build":"NODE_ENV=production grunt build","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","examples":"node ./examples/server.js","fix":"eslint --fix lib/**/*.js","postversion":"git push && git push --tags","preversion":"npm test","start":"node ./sandbox/server.js","test":"grunt test","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json"},"typings":"./index.d.ts","unpkg":"dist/axios.min.js","version":"0.21.4"}');
 
 /***/ })
 

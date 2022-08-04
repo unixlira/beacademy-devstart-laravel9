@@ -2,48 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    protected $product;
-
-    public function __construct(Product $product)
+    public function home()
     {
-        $this->product = $product;
+        return view("home.home");
     }
 
-    public function index()
+    public function login()
     {
-        $products = $this->product->getProducts();
-
-        return view('site.home', compact('products'));
+        return view("home.login");
     }
 
-    public function home(Request $request)
+    public function about()
     {
-        $products = $this->product->getProducts();
-
-        return view('site.home', compact('products','request'));
+        return view("home.about");
     }
 
-    public function cart()
+    public function contact()
     {
-        $products = $this->product->getProducts();
-
-        return view('site.cart', compact('products'));
-    }
-
-    public function addCart(Request $request)
-    {
-        $products = $request->name;
-        session()->put('products', $products);
-        return redirect()->back();
-    }
-
-    public function orders()
-    {
-        return view('site.orders');
+        return view("home.contact");
     }
 }

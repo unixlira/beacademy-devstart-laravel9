@@ -17,9 +17,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'is_admin',
+        // 'is_admin',
         'password',
-        'image'
+        // 'image'
     ];
 
 
@@ -33,9 +33,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $attributes = [
-        'is_admin' => '0'
-    ];
+    // protected $attributes = [
+    //     'is_admin' => '0'
+    // ];
 
     public function getUsers(string $search = null)
     {

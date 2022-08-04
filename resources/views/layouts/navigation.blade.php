@@ -6,7 +6,8 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                    <img width="150px"  src="{{url('/storage/logo-login.png')}}" alt="be.academy" >                    </a>
+                        <x-application-logo class="block h-10 w-auto fill-current text-gray-600" />
+                    </a>
                 </div>
 
                 <!-- Navigation Links -->
